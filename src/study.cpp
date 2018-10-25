@@ -1,6 +1,7 @@
-#include<stdio.h>
+#include<iostream>
 #include"struct.h"
-void sectionPrint(sql L[],int times)
+using namespace std;
+int sectionPrint(sql L[],int times)
 {
 	int i,j,num;
 	for (j=0;j<times/10;j++)
@@ -43,12 +44,3 @@ void sectionPrint(sql L[],int times)
 			}
 	}
 }
-
-/*int main()
-{
-	int i, j;
-	sql real[1000];
-	load(real, 58);
-	sectionPrint(real, 58);
-	getchar();
-}*/ //用于调试的main函数
