@@ -2,25 +2,27 @@
 #include<stdilb.h>
 #include<string.h>
 #include<conio.h>
-#include<struct.h>
+
+extern int amount = 100;
 
 void kong();                           //初始化界面
 int  enroll();                         //用户注册登录
 void menu();                           //菜单界面
 void colour();                         //设置界面颜色
 void changecode();                     //修改密码
-int  sectionPrint(sql L[],int times);  //单词预览
+int  sectionPrint(wordku L[],int times);  //单词预览
 void wordstudy();                      //新词学习
-void review(sql L[],int j)             //英译中
+void ETC(wordku L[],int j);             //英译中
+void CTE(wordku L[],int j);				//中译英
 void wordspell();                      //单词拼写
-int  sort(sql L[],sql M[], int i);     //错题集整理
+int  sort(wordku L[],wordku M[], int i);     //错题集整理
 void addku();                          //词库增加
 void correctku();                      //词库修改
 void deleteku();                       //单词删除
 void addword();                        //词库补充
-void suffle(sql L[],int i);   	       //单词背诵：数组（伪）无规则排序
+void suffle(wordku L[],int i);   	       //单词背诵：数组（伪）无规则排序
  
-
+ extern int amount = 100;
 
 typedef struct{                        //定义文件结构体，储存该应用的账号密码
 	char name[20];                     //账号
@@ -36,21 +38,10 @@ user p;
 typedef struct {                       //定义单词库结构体wordku
 	char word[15];                     //单词
 	char tag[5];                       //词性
-	char trans_cn[20];                 //释义
+	char trans_cn[20];				   //释义
+	int wrongnumber;						   //错误次数
 }wordku;
           
-typedef stuct{                         //定义错题集结构体wrongku
-	char word[15];                     //错词
-	char tag[5];                       //词性
-	char trans_cn[20];                 //释义
-}wrongku;
-
-typedef struct {                       //定义sq1结构体
-	char word[15];                     //
-	char tag[5];
-	char trans_cn[100];
-	int wrong;
-}sql;
 
 void kong()  //初始界面
 {
@@ -152,9 +143,9 @@ int enroll()                           //定义函数：注册和登录
 				else if(j == 2)
 				    
 				else if(j == 3)
-				    review(sql L[],int j);        //参数未设置
+				    review(wordku L[],int j);        //参数未设置
 				else if(j == 4)
-					sort(sql L[],sql M[], int i)；
+					sort(wordku L[],wordku M[], int i)；
 				else
 					menu();
 				break;
@@ -231,7 +222,7 @@ void changecode()                         //定义函数：修改密码
 	menu();
 }
 
-int sectionPrint(sql L[],int times)       //每页十组单词，用户通过点击按键选择页数
+int sectionPrint(wordku L[],int times)       //每页十组单词，用户通过点击按键选择页数
 {
 	int i,j,num;
 	for (j=0;j<times/10;j++)              
@@ -276,17 +267,53 @@ int sectionPrint(sql L[],int times)       //每页十组单词，用户通过点
 	}
 }
 
-void review(sql L[],int j)	    //英译中答题
+void ETC(wordku L[])	    //输入英文找中文
+{
+	printf("Your word：\n");
+	char word[15];
+	gets_s(word, 15);
+	int i;
+	for (i = 0; i < amount; i++)
+	{
+		if (strcmp(word, L[i].word)==0)
+		{
+			printf("%s\n%s", L[i].tag, L[i].trans_cn);
+		}
+		else
+		{
+			printf("此单词不在词库中")；
+		}
+	}
+}
+void CTE(wordku L[])	    //输入中文找英文
+{
+	printf("释义：\n");
+	char trans_cn[100];
+	gets_s(trans_cn, 100);
+	int i;
+	for (i = 0; i < amount; i++)
+	{
+		if (strcmp(word, L[i].trans_cn)==0)
+		{
+			printf("%s\n%s", L[i].tag, L[i].word);
+		}
+		else
+		{
+			printf("此单词不在词库中")；
+		}
+	}
+}
+void wordspell(wordku L[],int j)	    //单词拼写
 {
 	int i;
 	char corr[100];
 	for (i = 0; i < j; i++)
 	{
 		system("cls");
-		printf("%s,%d\n",  L[i].word,L[i].wrong);
-		printf("请输入中文释义：\n");
+		printf("%s,%d\n",  L[i].trans_cn);
+		printf("请输入中文所对的英文单词：\n");
 		scanf_s("%s",corr,100);
-		if (strcmp(corr,L[i].trans_cn)==0)
+	if (strcmp(corr,L[i].word)==0)
 		{
 			printf("You are correct!\n please press enter to the next word\n");
 			getchar();
@@ -295,7 +322,7 @@ void review(sql L[],int j)	    //英译中答题
 		else
 		{
 			printf("Um,you are wrong!\n please try again\n");
-			L[i].wrong++;
+			L[i].wrongnumber++;
 			getchar();
 			getchar();
 			i = i - 1;
@@ -303,13 +330,14 @@ void review(sql L[],int j)	    //英译中答题
 	}
 }
 
-int sort(sql L[],sql M[], int i)       	//错题整理
+
+int sort(wordku L[],wordku M[], int i)       	//错题整理
 {
 	int j;
 	int n = 0;
 	for (j = 0; j < i; j++)
 	{
-		if (L[j].wrong != 0)
+		if (L[j].wrongnumber != 0)
 		{
 			M[n] = L[j];
 			n++;
@@ -318,70 +346,61 @@ int sort(sql L[],sql M[], int i)       	//错题整理
 	return n;
 }
 
-void addword()                            //定义函数：词库补充
+void addword(wordku *L)                            //定义函数：词库补充
 {
-	FILE *p;
-	char word[15],tag[5],trans_cn[20];
-	char ch;
-	p=fopen("wordku.txt","a+");           //word.txt为词库文件
-	if(p==0)
-	{
-		printf("\t\t\t\t\t file error\n");
-		exit(1);
-	}
 	printf("\t\t\t\t\t请输入您要添加的单词：");
 	getchar();
-    gets(word);
+    gets(L[amount].word);
 	printf("\t\t\t\t\t该词的词性：");
-	gets(tag);
+	gets(L[amount].tag);
 	printf("\t\t\t\t\t中文意思:");
-    gets(trans_cn)
-	printf("\t\t\t\t\t您是否还要继续？ Y/N :");
+    gets(L[amount].trans_cn);
+	printf("\t\t\t\t\t您是否还要继续？ Y/Any other :");
+	amount++;
 	scanf("%s",&ch);
 	if(ch=='Y')
 		{
 			addword();
 		}
-	if(ch=='Y')
+	else
 		{
 			return;
 		}
+
 }
  
-void deleteword()                       //定义函数：单词删除
+void deleteword(wordku *L)                       //定义函数：单词删除
 {
 	char word[20];
-	int i=0;
+	int i;
 	int m;
 	printf("\t\t\t\t\t   请输入您要删除的单词：");
 	getchar();
 	gets(word);
-	while(strcmp(wordku[i].word,word)!=0&&i<SIZE)
-		i++;
-	if(i<SIZE)
+		for (i = 0; i < amount; i++)
 	{
-		for( ;i<SIZE;i++)
-			wordku[i]=ku[i+1];
-		puts("\t\t\t\t\t 删除成功！");
+		if (!strcmp(Search, L[i].word))		//查找符合项
+		{
+			amount++;
+			break;
+		}
+		else
+			printf("未找到对应的单词")
 	}
-	else
+	for (j = i + 1; j < 1000; j++)		
 	{
-		puts("\t\t\t\t\t 没有找到对应的单词！\n");
+		L[j - 1] = L[j];		//删除的元素之后所有项向前移一位
 	}
-	printf("\t\t\t\t\t   请输入0返回菜单\n");
-	printf("\t\t\t\t\t\t\t");
-	scanf("%d",&m);
-	if(m==0)
-	{
-		return;
-	}
+	printf("press any key to continue\n");
+	getchar();
+	menu();
 }
 
-void suffle(sql L[],int i)	//数组（伪）无规则排序
+void suffle(wordku L[],int i)	//数组（伪）无规则排序
 {
 	srand(time(0));
 	int j;
-	sql temp;
+	wordku temp;
 	for (i; i>1; i--)
 	{
 		srand(time(0));
@@ -401,28 +420,32 @@ void suffle(sql L[],int i)	//数组（伪）无规则排序
 
 
 
-extern int amount = 100;
 
-void init(sql L[],int i=1000)
+
+void init(wordku L[],int i=1000)
 {
 	int j;
 	for (j = 0; j < i; j++)
 	{
-		L[j].wrong = 0;
+		L[j].wrongnumber = 0;
 	}
 }
 
-void save(sql *L,char *name)               //存储新单词
+void save(wordku *L,char *name)               //存储新单词
 {
+	int i;
 	FILE *fp;
 	errno_t err;
 	strcat_s(name, 15, ".txt");
 	err = fopen_s(&fp, name, "a");
-	fprintf_s(fp, "%s %s %s\n", L->word, L->tag, L->trans_cn);
+	for(i=0;i<amount,i++)
+	{
+		fprintf_s(fp, "%s %s %s\n", L[i].word, L[i].tag, L[i].trans_cn);
+	}
 	fclose(fp);
 }
 
-void load(sql *L, int i)
+void load(wordku *L, int i)
 {
 	int j;
 	FILE *fp;
@@ -438,22 +461,8 @@ void load(sql *L, int i)
 	fclose(fp);
 }
 
-void add(sql *L, int i,char *name)		//i为增加单词的数量
-{
-	int j;
-	for (j =  0; j < i; j++, L++)
-	{
-		printf_s("Please input the word\n");
-		gets_s(L->word, 15);
-		printf_s("The tag:\n");
-		gets_s(L->tag, 5);
-		printf_s("The trans_cn:\n");
-		gets_s(L->trans_cn, 100);
-		save(L,name);
-	}
-}
 
-void Edit(sql *L)
+void Edit(wordku *L)
 {
 	int i;
 	char Search[15];
@@ -472,22 +481,6 @@ void Edit(sql *L)
 	gets_s(L[i].trans_cn, 100);
 }
 
-void Delete(sql *L)
-{
-	int i, j;
-	char Search[15];
-	printf_s("Input the word you want to delete:\n");
-	gets_s(Search, 15);
-	for (i = 0; i < 1000; i++)
-	{
-		if (!strcmp(Search, L[i].word))
-			break;
-	}
-	for (j = i + 1; j < 1000; j++)		//查找并删除
-	{
-		L[j - 1] = L[j];
-	}
-}
 
 //主函数
 void main()
