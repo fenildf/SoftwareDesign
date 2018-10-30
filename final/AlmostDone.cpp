@@ -167,6 +167,7 @@ void enroll()                           //定义函数：注册和登录
 void menu()            //定义函数：菜单
 {
 	int i, j, k,m,times;
+	system("cls");
 	printf("\t\t\t\t 0:颜色设置\n");   //定义菜单选项，从0-4自主选择
 	printf("\t\t\t\t 1:修改密码\n");
 	printf("\t\t\t\t 2:单词学习\n");
@@ -502,9 +503,6 @@ void suffle(int i)	//数组（伪）无规则排序
 
 
 
-
-
-
 void init(int i = 1000)
 {
 	int j;
@@ -533,21 +531,15 @@ void load()
 	FILE *fp,*fp1;
 	errno_t err;
 	char count[20],*file;
-	//strcpy(count, name);
 	filename = strcat(name, ".txt");
-	//file = strcat(count, "c.txt");
 	err = fopen_s(&fp, filename, "r+");
 	for (j = 0; j < 100; j++)
 	{
 		fscanf_s(fp, "%s", (L + j)->word, 15);
 		fscanf_s(fp, "%s", (L + j)->tag, 5);
 		fscanf_s(fp, "%s", (L + j)->trans_cn, 100);
-		//fscanf_s(fp, "%d", (L + j)->wrong, sizeof(int));
 	}
 	fclose(fp);
-	//fopen_s(&fp1, file, "r+");
-	//fscanf_s(fp1, "%d", amount, sizeof(int));
-	//fclose(fp1);
 }
 
 
@@ -572,5 +564,6 @@ void Edit()
 
 int main()
 {
+	init();
 	enroll();
 }
