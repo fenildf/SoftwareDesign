@@ -6,14 +6,15 @@
 #define SIZE  300 
 typedef int errno_t;
 
-int amount = 100;
+int amount = 0;
 char name[20];
 int number;
 char *filename;
 char wrongName[20];
 int number_wrong = 0;                  //错词数
 char *wrongFilename;
-int wrongNum;
+int wrongNum;                         // 
+int user_amount=0;
 
 typedef struct {                        //定义单词库结构体wordku
 	char word[15];                     //单词
@@ -32,6 +33,7 @@ struct wrongwords {                     //定义错词库结构体wrongku
 typedef struct {                       //定义用户结构体users
 	char account[20];                  //账号
 	char code[20];                     //密码
+	int  times;                        //打卡次数
 }user;
 user p;
 user man[100];
@@ -47,10 +49,10 @@ int  intest();                          //随机产生单词
 void wordstudy();                       //新词学习
 void ETC();                             //英译中
 void CTE();			                	//中译英
-void wordspell(int j);            //单词拼写
+void wordspell(int j);                  //单词拼写
 void cuotiben_read();                   //从错词本读入文件
-void cuotiben_write();                  //从错题本写入文件
-void cuotiben(int a);                   //错题本
+void cuotiben_write();                  //从错词本写入文件
+void cuotiben(int a);                   //错词本
 void sort_wrong();                      //错词排序
 void test_wrong();                      //错词测试
 void addword();                         //词库增加
@@ -65,7 +67,7 @@ void Init()      //初始界面
 	printf("\t\t\t\t\t**                              **\t\t\t\t\t\n");
 	printf("\t\t\t\t\t**      欢迎使用背单词程序      **\t\t\t\t\t\n");
 	printf("\t\t\t\t\t**                              **\t\t\t\t\t\n");
-	printf("\t\t\t\t\t**  设计者：吴昊、曹丹、吴雨欣  **\t\t\t\t\t\n");
+	printf("\t\t\t\t\t**  设计者：**、**、***  **\t\t\t\t\t\n");
 	printf("\t\t\t\t\t**                              **\t\t\t\t\t\n");
 	printf("\t\t\t\t\t**********************************\t\t\t\t\t\n");
 }
@@ -88,7 +90,6 @@ void enroll()                           //定义函数：注册和登录
 	wordku temp[1000];
 	FILE *fp, *fp1, *fp2;
 	fp = fopen("name.txt", "a+");
-	int count = 0;                        //定义打卡次数    
 	int  m, i;
 	char n[20], c[20];
 	printf("\t\t\t\t\t _________________________________ \t\t\t\t\t\n");
@@ -105,10 +106,12 @@ void enroll()                           //定义函数：注册和登录
 		printf("\t\t\t\t\t 请设置账号名[不能超过20个字符]: ");
 		getchar();
 		gets_s(n);
-		for (m = 0; m < 100; m++)
+		while(!feof(fp))
 		{
-			fscanf(fp, "%s", man[m].account);
-			fscanf(fp, "%s", man[m].code);
+			fscanf(fp, "%s", man[user_amount].account);
+			fscanf(fp, "%s", man[user_amount].code);
+			fscanf(fp, "%d", &man[user_amount].times);
+			//user_amount++;
 		}
 		for (m = 0; m < 100; m++)
 		{
@@ -129,10 +132,10 @@ void enroll()                           //定义函数：注册和登录
 		printf("\t\t\t\t\t 请设置密码[不能超过20个字符]:");
 		gets_s(c);
 		strcpy(p.code, c);
-		fprintf(fp, "%s %s\n", p.account, p.code);
+		p.times = 1;
+		fprintf(fp, "%s %s %d\n", p.account, p.code,p.times);
 		fclose(fp);
 		printf("\t\t\t\t\t 您已注册成功! 您的账号为:%s\n", p.account);
-
 		filename = strcat(name, ".txt");
 		fp1 = fopen(filename, "a+");
 		fp2 = fopen("wordku.txt", "a+");
@@ -159,6 +162,11 @@ void enroll()                           //定义函数：注册和登录
 		{
 			fscanf(fp, "%s", man[m].account);
 			fscanf(fp, "%s", man[m].code);
+			fscanf(fp, "%d", &man[m].times);
+			if (man[m].times != 0)
+			{
+				user_amount++;
+			}
 		}
 		fclose(fp);
 		for (m = 0; m < 100; m++)
@@ -174,7 +182,13 @@ void enroll()                           //定义函数：注册和登录
 					wrongFilename = strcat(wrongName, "w.txt");
 					number = m;
 					strcpy(name, man[m].account);
-					printf("\t\t\t\t\t 坚持打卡第%d天,继续坚持呀 ^=^\t\t\t\t\t\n", ++count);
+					printf("\t\t\t\t\t 坚持打卡第%d天,继续坚持呀 ^=^\t\t\t\t\t\n", man[m].times++);
+					fp = fopen("name.txt", "w+");
+					for (m = 0; m < user_amount; m++)
+					{
+						fprintf(fp, "%s %s %d\n", man[m].account,man[m].code,man[m].times);
+					}
+					fclose(fp);
 					getchar();
 					system("cls");
 					load();
@@ -187,7 +201,6 @@ void enroll()                           //定义函数：注册和登录
 			}
 			printf("\t\t\t\t\t 登录失败\n");
 			printf("\t\t\t\t\t 请重新输入\n");
-			count++;
 			getchar();
 			system("cls");
 			enroll();
@@ -326,13 +339,14 @@ void changecode()               //定义函数：修改密码
 	{
 		fscanf(fp, "%s", man[m].account);
 		fscanf(fp, "%s", man[m].code);
+		fscanf(fp, "%d", &man[m].times);
 	}
 	strcpy(man[number].code, p.code);
 	fclose(fp);
 	fp = fopen("name.txt", "r+");
 	for (m = 0; m < 100; m++)
 	{
-		fprintf(fp, "%s %s\n", man[m].account, man[m].code);
+		fprintf(fp, "%s %s %d\n", man[m].account, man[m].code,man[m].times);
 	}
 	fclose(fp);
 	printf("\t\t\t\t\t 修改成功!\n");
@@ -523,7 +537,7 @@ void cuotiben_write()    //错题写入文件
 	FILE *fp4;
 	int i = 0;
 	fp4 = fopen(wrongFilename, "r+");
-	for (i; i < number_wrong+wrongNum; i++)
+	for (i; i < number_wrong + wrongNum; i++)
 	{
 		fprintf(fp4, "%s %s %s %d\n", wrongku[i].word, wrongku[i].tag, wrongku[i].trans_cn, wrongku[i].priority);
 	}
@@ -641,7 +655,7 @@ void deleteword()          //定义函数：单词删除
 	{
 		if (!strcmp(word, L[i].word))		//查找符合项
 		{
-			amount++;
+			amount--;
 			break;
 		}
 		else
@@ -681,7 +695,7 @@ void suffle(int i)	        //数组（伪）无规则排序
 void save()               //存储新单词
 {
 	int i;
-	FILE *fp = fopen(name, "a");
+	FILE *fp = fopen(name, "w");
 	for (i = 0; i < amount; i++)
 	{
 		fprintf(fp, "%s %s %s\n", L[i].word, L[i].tag, L[i].trans_cn);
@@ -691,15 +705,15 @@ void save()               //存储新单词
 
 void load()            //把文件内的内容写入结构体
 {
-	int j;
 	filename = strcat(name, ".txt");
 	FILE *fp = fopen(filename, "r+");
 	char count[20], *file;
-	for (j = 0; j < 100; j++)
+	while(!feof(fp))
 	{
-		fscanf(fp, "%s", (L + j)->word, 15);
-		fscanf(fp, "%s", (L + j)->tag, 5);
-		fscanf(fp, "%s", (L + j)->trans_cn, 100);
+		fscanf(fp, "%s", (L + amount)->word, 15);
+		fscanf(fp, "%s", (L + amount)->tag, 5);
+		fscanf(fp, "%s", (L + amount)->trans_cn, 100);
+		amount++;
 	}
 	fclose(fp);
 }
@@ -709,18 +723,30 @@ void Edit()                //词库编辑
 	int i;
 	char Search[15];
 	printf("Input the word you want to edit:\n");
+	getchar();
 	gets_s(Search);
-	for (i = 0; i < 1000; i++)
+	for (i = 0; i < amount; i++)
 	{
-		if (!strcmp(Search, L[i].word))		//查找符合的单词
+		if (strcmp(Search, L[i].word) == 0)
+		{
+			printf("修改单词:");
+			gets_s(L[i].word);
+			printf("修改词性:");
+			gets_s(L[i].tag);
+			printf("修改释义:");
+			gets_s(L[i].trans_cn);
+			getchar();
+			save();
 			break;
+		}
+		else
+			if (i < amount - 1)
+			{
+				continue;
+			}
+		printf("此单词不在词库中\n");
+		getchar();
 	}
-	printf("The word:\n");
-	gets_s(L[i].word);
-	printf("The tag:\n");
-	gets_s(L[i].tag);
-	printf("The trans_cn:\n");
-	gets_s(L[i].trans_cn);
 }
 
 int main()
