@@ -88,7 +88,7 @@ void enroll()                           //定义函数：注册和登录
 
 {
 	wordku temp[1000];
-	FILE *fp, *fp1, *fp2;
+	FILE *fp, *fp1, *fp2,*fp3;
 	fp = fopen("name.txt", "a+");
 	int  m, i;
 	char n[20], c[20];
@@ -127,6 +127,9 @@ void enroll()                           //定义函数：注册和登录
 			}
 		}
 		strcpy(wrongName, n);
+		wrongFilename = strcat(wrongName, "w.txt");
+		fp3=fopen(wrongFilename, "w+");
+		fclose(fp3);
 		strcpy(name, n);
 		strcpy(p.account, n);
 		printf("\t\t\t\t\t 请设置密码[不能超过20个字符]:");
@@ -481,6 +484,7 @@ void wordspell(int num)	    //单词拼写
 		{
 			cuotiben(m);
 			printf("Um,you are wrong!\n Come on,please!\n");
+			getchar();
 			getchar();
 			continue;
 		}
